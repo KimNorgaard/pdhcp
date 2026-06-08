@@ -578,7 +578,7 @@ func main() {
 				mu.Lock()
 				if contexts[key] != nil {
 					mu.Unlock()
-					break
+					continue
 				}
 				contexts[key] = &CONTEXT{time.Now(), packet.source, packet.client, frame}
 				mu.Unlock()
@@ -631,7 +631,7 @@ func main() {
 				ctx := contexts[key]
 				mu.RUnlock()
 				if ctx == nil {
-					break
+					continue
 				}
 				client := ctx.client
 				if address, port, err := net.SplitHostPort(ctx.client); err == nil {
@@ -645,7 +645,7 @@ func main() {
 					}
 
 				} else {
-					break
+					continue
 				}
 				if mode == "relay" {
 					logger.Info(map[string]any{
@@ -668,24 +668,24 @@ func main() {
 						}
 						if _, err := sources[ctx.source].rconn.WriteTo(nil, to, packet); err != nil {
 							logger.Warn(map[string]any{"event": "reply", "reason": err.Error()})
-							break
+							continue
 						}
 
 					} else {
 						logger.Warn(map[string]any{"event": "reply", "reason": err.Error()})
-						break
+						continue
 					}
 
 				} else {
 					if address, err := net.ResolveUDPAddr("udp", client); err == nil {
 						if _, err := sources[ctx.source].pconn.WriteTo(packet, address); err != nil {
 							logger.Warn(map[string]any{"event": "reply", "reason": err.Error()})
-							break
+							continue
 						}
 
 					} else {
 						logger.Warn(map[string]any{"event": "reply", "reason": err.Error()})
-						break
+						continue
 					}
 				}
 				hostname := j.String(frame["hostname"])
